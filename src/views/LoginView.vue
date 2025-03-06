@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { AUTH_CONFIG } from "@/config/authConfig";
 import router from "@/router";
 import { useAuthStore } from "@/stores/authStore";
 import { message } from "ant-design-vue";
@@ -32,6 +33,18 @@ const handleLogin = async () => {
   if (success) {
     router.push("/"); // 로그인 성공 시 이동
   }
+};
+
+const handleKakaoLogin = (provider: "KAKAO" | "NAVER" | "GOOGLE") => {
+  const config = AUTH_CONFIG[provider];
+  const authUrl = `${config.AUTH_URL}?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code`;
+  window.location.href = authUrl;
+};
+
+const handleSocialLogin = (provider:  "NAVER" | "GOOGLE") => {
+  const config = AUTH_CONFIG[provider];
+  const authUrl = `${config.AUTH_URL}?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${encodeURIComponent(config.SCOPE)}`;
+  window.location.href = authUrl;
 };
 
 </script>
@@ -76,9 +89,9 @@ const handleLogin = async () => {
       </div>
 
       <div class="social-signup">
-        <img src="/icons/SignUp/kakao.svg" /> <br>
-        <img style="margin-top: 11px;" src=" /icons/SignUp/naver.svg" /> <br>
-        <img style="margin-top: 11px;" src="/icons/SignUp/google.svg" />
+        <img src="/icons/SignUp/kakao.svg" @click="() => handleKakaoLogin('KAKAO')"/> <br>
+        <img style="margin-top: 11px;" src=" /icons/SignUp/naver.svg" @click="() => handleSocialLogin('NAVER')"/> <br>
+        <img style="margin-top: 11px;" src="/icons/SignUp/google.svg" @click="() => handleSocialLogin('GOOGLE')"/>
       </div>
 
     </div>
