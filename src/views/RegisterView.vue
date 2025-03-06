@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 import { message } from "ant-design-vue";
-import axios from "axios";
 import router from "@/router";
+import axiosApi from "@/config/axiosConfig";
+import { AUTH_CONFIG } from "@/config/authConfig";
 
 const address = ref<string>("");
 const domain = ref<string>("@naver.com");
@@ -10,16 +11,7 @@ const password1 = ref<string>("");
 const password2 = ref<string>("");
 const fullName = ref<string>("");
 
-const user = reactive<User>({
-  email: "",
-  password: "",
-  name: "",
-  age: undefined,
-  address: "",
-  phone: "",
-  avatar: "",
-  hobby: [],
-});
+
 
 const validateEmail = () => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,17 +54,39 @@ const handleSignUp = async () => {
   if (!validateForm()) return;
 
   try {
-    const response = await axios.post("http://13.125.143.126:5005/signup", {
+    const response = await axiosApi.post("http://13.125.143.126:5005/signup", {
       email: address.value + domain.value,
       password: password1.value,
       fullName: fullName.value,
     });
-    message.success("회원가입 성공!");
-    router.push("/login");
+
+    if (response.status === 400) {
+      message.error("이메일 중복")
+
+    } else {
+      message.success("회원가입 성공!");
+      console.log(response, response.data, response.status);
+      router.push("/login");
+
+    }
   } catch (error) {
+    console.log(error);
     message.error("회원가입 실패! 다시 시도해주세요.");
   }
 };
+
+const handleKakaoLogin = (provider: "KAKAO" | "NAVER" | "GOOGLE") => {
+  const config = AUTH_CONFIG[provider];
+  const authUrl = `${config.AUTH_URL}?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code`;
+  window.location.href = authUrl;
+};
+
+const handleSocialLogin = (provider: "NAVER" | "GOOGLE") => {
+  const config = AUTH_CONFIG[provider];
+  const authUrl = `${config.AUTH_URL}?client_id=${config.CLIENT_ID}&redirect_uri=${config.REDIRECT_URI}&response_type=code&scope=${encodeURIComponent(config.SCOPE)}`;
+  window.location.href = authUrl;
+};
+
 </script>
 
 <template>
@@ -111,7 +125,7 @@ const handleSignUp = async () => {
         </div>
 
         <div class="input-text">비밀번호 입력</div>
-        <a-input-password v-model:value="password1" placeholder="비밀번호를 입력해주세요"  />
+        <a-input-password v-model:value="password1" placeholder="비밀번호를 입력해주세요" />
         <div class="small-text"> 영문 대·소문자/숫자.특수문자 중 2가지 이상 조합, 8~16글자 </div>
 
         <div class="input-text">비밀번호 확인</div>
@@ -120,7 +134,7 @@ const handleSignUp = async () => {
 
 
         <div>
-          <a-button type="submit" class="button" @click="handleSignUp">회원가입</a-button>
+          <a-button type="primary" class="button" @click="handleSignUp">회원가입</a-button>
         </div>
       </div>
 
@@ -137,9 +151,9 @@ const handleSignUp = async () => {
       </div>
 
       <div class="social-signup">
-        <img src="/icons/SignUp/kakao.svg" /> <br>
-        <img style="margin-top: 11px;" src=" /icons/SignUp/naver.svg" /> <br>
-        <img style="margin-top: 11px;" src="/icons/SignUp/google.svg" />
+        <img src="/icons/SignUp/kakao.svg" @click="() => handleKakaoLogin('KAKAO')" /> <br>
+        <img style="margin-top: 11px;" src=" /icons/SignUp/naver.svg" @click="() => handleSocialLogin('NAVER')" /> <br>
+        <img style="margin-top: 11px;" src="/icons/SignUp/google.svg" @click="() => handleSocialLogin('GOOGLE')" />
       </div>
 
     </div>
