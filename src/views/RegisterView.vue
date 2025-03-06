@@ -54,7 +54,8 @@ const handleSignUp = async () => {
   if (!validateForm()) return;
 
   try {
-    const response = await axiosApi.post("http://13.125.143.126:5005/signup", {
+      const response = await axiosApi.post("/signup", {
+
       email: address.value + domain.value,
       password: password1.value,
       fullName: fullName.value,
