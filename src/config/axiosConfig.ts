@@ -2,12 +2,13 @@ import axios from 'axios';
 
 // Axios 인스턴스 생성
 const axiosApi = axios.create({
-  baseURL: "http://13.125.143.126:5005", // API 기본 주소
+  // baseURL: "http://13.125.143.126:5005", // API 기본 주소
+  baseURL: import.meta.env.VITE_API_BASE_URL, // API 기본 주소
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     timeout: 1000,
-  }
-});
+  },
+})
 
 // 요청 인터셉터 설정 (토큰 추가)
 axiosApi.interceptors.request.use(
